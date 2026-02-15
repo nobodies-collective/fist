@@ -13,8 +13,9 @@ export const devConfig = Meteor.isProduction ? {} : {
 }
 
 if (Meteor.isProduction) {
-  const emptyKey = Object.keys(config).find(key => !config[key])
-  if (emptyKey) throw new Error(`Config value ${emptyKey} is not set. Check your env vars`)
+  Object.keys(config).forEach((key) => {
+    if (!config[key]) console.warn(`Config value ${key} is not set. Check your env vars`)
+  })
 } else {
   // eslint-disable-next-line global-require
   const testConf = require('./env.json')
