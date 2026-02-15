@@ -40,3 +40,24 @@ Migrations.add({
     )
   },
 })
+
+// Make anyone who was a 2025 admin/manager one for 2026
+Migrations.add({
+  version: 18,
+  up() {
+    Meteor.users.update(
+      {
+        roles: { $elemMatch: { _id: 'admin', scope: 'nowhere2025' } },
+      },
+      { $addToSet: { roles: { _id: 'admin', scope: 'fixme2026', assigned: true } } },
+      { multi: true },
+    )
+    Meteor.users.update(
+      {
+        roles: { $elemMatch: { _id: 'manager', scope: 'nowhere2025' } },
+      },
+      { $addToSet: { roles: { _id: 'manager', scope: 'fixme2026', assigned: true } } },
+      { multi: true },
+    )
+  },
+})

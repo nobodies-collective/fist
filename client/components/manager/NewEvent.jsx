@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Blaze from 'meteor/gadicc:blaze-react-component'
 import { AutoForm } from 'meteor/aldeed:autoform'
 import { Loading } from 'meteor/goingnowhere:volunteers'
+import { orgConfig } from '../../../both/config'
 
 import { Volunteers } from '../../../both/init'
 import { fetchSettings } from '../../../both/methods'
@@ -59,7 +60,7 @@ export const NewEvent = ({ onSubmitted }) => {
       {settings && settings.previousEventName === Volunteers.eventName && (
         <p>
           Unfortunately, due to how this system was built, we currently need a developer to set
-          things up for the next year. Send bribe details to fist@goingnowhere.org before this
+          things up for the next year. Send bribe details to {orgConfig.supportEmail} before this
           will work.
         </p>
       )}

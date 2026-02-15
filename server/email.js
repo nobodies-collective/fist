@@ -10,6 +10,7 @@ import moment from 'moment-timezone'
 
 import { Volunteers } from '../both/init'
 import { EventSettings } from '../both/collections/settings'
+import { orgConfig } from '../both/config'
 
 const authMixins = Volunteers.services.auth.mixins
 
@@ -374,8 +375,8 @@ export const sendReviewNotificationEmail = new ValidatedMethod({
 })
 
 // Defaults
-Accounts.emailTemplates.from = 'FIST <fist@goingnowhere.org>'
-Accounts.emailTemplates.siteName = 'FIST Nowhere 2025'
+Accounts.emailTemplates.from = `FIST <${orgConfig.supportEmail}>`
+Accounts.emailTemplates.siteName = `FIST ${orgConfig.name} ${Volunteers.eventName}`
 
 Accounts.emailTemplates.enrollAccount.from = () => EmailForms.getFrom('enrollAccount')
 Accounts.emailTemplates.enrollAccount.subject = (user) => {

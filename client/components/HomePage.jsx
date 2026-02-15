@@ -7,6 +7,7 @@ import React, {
 import Fa from 'react-fontawesome'
 import { Link } from 'react-router-dom'
 import moment from 'moment-timezone'
+import { orgConfig } from '../../both/config'
 
 export function HomePage({ user, settings, isLoaded }) {
   const openMoment = useMemo(() =>
@@ -32,7 +33,7 @@ export function HomePage({ user, settings, isLoaded }) {
     <>
       <header id="page-top" className="masthead bg-primary text-white text-center">
         <div className="container">
-          <h1 className="home-title">Co-Create Nowhere 2025</h1>
+          <h1 className="home-title">Co-Create {orgConfig.name} {new Date().getFullYear()}</h1>
           <div className="row justify-content-center">
             <div className="col-lg-6">
               {!isLoaded ? (
@@ -47,7 +48,7 @@ export function HomePage({ user, settings, isLoaded }) {
                       <button type="button" className="col btn btn-secondary m-1" disabled>
                         {seconds} seconds
                       </button>
-                      <a className="col btn btn-secondary m-1" href="https://www.goingnowhere.org/about/join/">
+                      <a className="col btn btn-secondary m-1" href={orgConfig.joinUrl}>
                         I can&apos;t wait, I want to volunteer now!
                       </a>
                     </div>
@@ -64,7 +65,7 @@ export function HomePage({ user, settings, isLoaded }) {
                       >
                         {user ? 'Get to it' : 'Register now'}
                       </Link>
-                      <a className="col btn btn-secondary m-1" href="https://www.goingnowhere.org/about/join/">
+                      <a className="col btn btn-secondary m-1" href={orgConfig.joinUrl}>
                         I want to help before getting to site!
                       </a>
                     </div>
@@ -91,8 +92,8 @@ export function HomePage({ user, settings, isLoaded }) {
                 <p className="lead">
                   If you get restless though, there&apos;s plenty to
                   get stuck into right now, so why wait? Head on over
-                  to <a href="https://www.goingnowhere.org/get-involved/volunteering/">the website</a> to
-                  find out what Nowhere needs most.
+                  to <a href={orgConfig.volunteeringUrl}>the website</a> to
+                  find out what {orgConfig.name} needs most.
                 </p>
               </div>
             </div>
@@ -100,7 +101,7 @@ export function HomePage({ user, settings, isLoaded }) {
             <div className="row">
               <div className="col-lg-4 ml-auto">
                 <p className="lead">
-                  Nowhere is an experiment in creative freedom,
+                  {orgConfig.name} is an experiment in creative freedom,
                   participation and cash-free community. Conceived,
                   built, experienced and returned to nothing by YOU.
                 </p>
@@ -123,13 +124,13 @@ export function HomePage({ user, settings, isLoaded }) {
             <div className="col-md-4 mb-5 mb-lg-0">
               <h4 className="text-uppercase mb-4">Location</h4>
               <p className="lead mb-0">Middle of Spain
-                <br />Middle of Nowhere
+                <br />Middle of {orgConfig.name}
               </p>
             </div>
             <div className="col-md-4">
               <h4 className="text-uppercase mb-4">About this website</h4>
               <p className="lead mb-0">
-                Made with love <a href="https://github.com/goingnowhere/volunteers-nowhere">See the Code</a>.
+                Made with love <a href={orgConfig.repoUrl}>See the Code</a>.
               </p>
             </div>
           </div>

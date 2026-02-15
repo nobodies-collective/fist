@@ -5,6 +5,7 @@ import { AutoForm } from 'meteor/aldeed:autoform'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { displayName } from 'meteor/goingnowhere:volunteers'
+import { orgConfig } from '../../../both/config'
 import moment from 'moment-timezone'
 
 import { Volunteers } from '../../../both/init'
@@ -15,7 +16,7 @@ import { MoveTeam } from './MoveTeam.jsx'
 const leadName = (leads, userId) => {
   const user = leads.find((lead) => lead._id === userId) || {}
   return displayName(user)
-    || user.emails?.find(({ address }) => address.endsWith('@goingnowhere.org'))?.address
+    || user.emails?.find(({ address }) => address.endsWith(`@${orgConfig.domain}`))?.address
     || user.emails?.[0]?.address
 }
 

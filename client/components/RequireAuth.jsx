@@ -3,6 +3,7 @@ import { Loading } from 'meteor/goingnowhere:volunteers'
 import { Redirect, useLocation, useParams } from 'react-router-dom'
 import moment from 'moment-timezone'
 import { Volunteers } from '../../both/init'
+import { orgConfig } from '../../both/config'
 import { NotFound } from './common/NotFound.jsx'
 
 export function RequireAuth({
@@ -28,7 +29,7 @@ export function RequireAuth({
     return <Redirect to="/verify-email" />
   }
   if (moment().isBefore(settings.fistOpenDate)
-    && !verifiedEmails.some(({ address }) => address.endsWith('@goingnowhere.org'))
+    && !verifiedEmails.some(({ address }) => address.endsWith(`@${orgConfig.domain}`))
     && !Volunteers.auth.isALead()) {
     // FIST is closed for now
     return <Redirect to="/" />

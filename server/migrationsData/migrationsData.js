@@ -1,6 +1,8 @@
+import { orgConfig } from '../../both/config'
+
 export const voluntellEmail = {
-  from: 'noreply@goingnowhere.org',
-  subject: 'NOWHERE SHIFT ASSIGNMENT',
+  from: orgConfig.noreplyEmail,
+  subject: `${orgConfig.name.toUpperCase()} SHIFT ASSIGNMENT`,
   body: `VOLUNTOLD!
 
 Congratulations, you’ve been assigned a shift, it's:
@@ -55,8 +57,8 @@ Este es un mensaje automatizado, contáctese con el líder del turno si tiene pr
 
 export const reviewEmail = {
 
-  from: 'noreply@goingnowhere.org',
-  subject: 'Your shift application at nowhere has been reviewed',
+  from: orgConfig.noreplyEmail,
+  subject: 'Your shift application has been reviewed',
   body: `Dear {{user.firstName}} {{#if user.nickName}}/ {{user.nickName}}{{/if}}
 
 You applied for a shift subject to approval from a team lead.
@@ -131,11 +133,11 @@ Este es un mensaje automatizado, contáctese con el líder del turno si tiene pr
 }
 
 export const reminderEmail = {
-  from: 'noreply@goingnowhere.org',
-  subject: 'Nowhere Shifts Reminder',
+  from: orgConfig.noreplyEmail,
+  subject: `${orgConfig.name} Shifts Reminder`,
   body: `Hello,
 
-This is a reminder regarding all your engagements at nowhere .
+This is a reminder regarding all your engagements at ${orgConfig.name} .
 {{#if $gt ($len duties.shifts) 0 }}Shifts
 {{#each duties.shifts }}
 - ({{status}}) : {{teamName}} > {{title}} {{$formatDateTime start}} - {{$formatDateTime end}}
@@ -160,8 +162,8 @@ Este es un mensaje automatizado, contáctese con el líder del turno si tiene pr
 }
 
 export const enrollInvalidEmail = {
-  from: 'volunteers@goingnowhere.org',
-  subject: 'Nowhere: More enrollment links (because you got more than one ticket) !',
+  from: orgConfig.supportEmail,
+  subject: `${orgConfig.name}: More enrollment links (because you got more than one ticket) !`,
   body: `Hello {{user.firstName}} {{#if user.nickname}}/ ( {{user.nickname}}) {{/if}}
 
 
@@ -197,19 +199,19 @@ This is an automated message, please contact the volunteer coordinator if you ha
 }
 
 export const earlyAdoptersEmail = {
-  from: 'volunteers@goingnowhere.org',
-  subject: 'Nowhere VMS: Need to know your ticket number !',
+  from: orgConfig.supportEmail,
+  subject: `${orgConfig.name} VMS: Need to know your ticket number !`,
   body: `Hello {{user.firstName}} {{#if user.nickname}}/ ( {{user.nickname}}) {{/if}}
 
 As first tester of the system you were asked to manually registered an
 account  Since you used a different email than the one used to buy your
-nowhere ticket (there are 36 of you ! ), we were not able to reconcile your
+event ticket (there are 36 of you ! ), we were not able to reconcile your
 account with your ticket. Since we need this information to compile the
 Early Entry list, is important to get this information from you and add it
 to your profile on the vms.
 
 A simple way to solve this problem is to add the email you used to get your
-ticket as secondary email in your account settings (https://vms.goingnowhere.org/profile/settings).
+ticket as secondary email in your account settings (https://fist.nobodies.team/profile/settings).
 
 Shortly after, the system will pick up this new email address and use it to find
 your ticket number. EasyPeasy.

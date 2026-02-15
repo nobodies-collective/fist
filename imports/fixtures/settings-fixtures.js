@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { EmailForms } from 'meteor/abate:email-forms'
 import { EventSettings } from '../../both/collections/settings'
+import { orgConfig } from '../../both/config'
 
 // Event is on second Sunday in July so 8th is always in that week (0 is Sunday)
 const nextEventStart = moment({ month: 6, day: 8 }).day(2)
@@ -22,8 +23,8 @@ const settings = {
     start: moment(nextEventStart).day(8).toDate(),
     end: moment(nextEventStart).day(14).toDate(),
   },
-  eventName: 'nowhere2025',
-  previousEventName: 'nowhere2024',
+  eventName: 'fixme2026',
+  previousEventName: 'nowhere2025',
   earlyEntryMax: 120,
   barriosArrivalDate: moment(nextEventStart).day(-1).subtract(1, 'weeks').toDate(),
   earlyEntryClose: moment(nextEventStart).subtract(3, 'weeks').toDate(),
@@ -44,14 +45,14 @@ export const createSettingFixtures = () => {
 const emailTemplates = [{
   name: 'enrollAccount',
   context: EmailForms.Collections.EmailTemplateContext.find({ name: { $in: ['User', 'Site'] } }).fetch(),
-  from: 'no-reply@goingnowhere.org',
+  from: orgConfig.noreplyEmail,
   subject: 'Join us',
   body: 'Dear {{user.firstName}}, click on this link {{enrollAccount.url}} to enroll',
 },
 {
   name: 'verifyEmail',
   context: EmailForms.Collections.EmailTemplateContext.find({ name: { $in: ['User', 'Site'] } }).fetch(),
-  from: 'no-reply@goingnowhere.org',
+  from: orgConfig.noreplyEmail,
   subject: 'Verify your email',
   body: 'Dear {{user.firstName}}, click on this link {{verifyEmail.url}} to verify your email',
 },

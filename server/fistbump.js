@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { fetch } from 'meteor/fetch'
 import { wrapAsync } from 'meteor/goingnowhere:volunteers'
 import { config } from './config'
+import { orgConfig } from '../both/config'
 
 function pickBestTicket(tickets, { email, ticketId }) {
   if (ticketId) {
@@ -79,7 +80,7 @@ export function serverCheckHash({ hash }) {
   try {
     checkResult = wrapAsync(checkHash)(hash)
   } catch (err) {
-    throw new Meteor.Error(500, 'There was an error on the server, if this persists, contact fist@goingnowhere.org')
+    throw new Meteor.Error(500, `There was an error on the server, if this persists, contact ${orgConfig.supportEmail}`)
   }
   if (!checkResult) {
     throw new Meteor.Error(400, 'Invalid log in link, please check your email')
