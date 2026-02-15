@@ -16,6 +16,8 @@ services:
       - NOONER_HUNT_API=${NOONER_HUNT_API:-https://fistbump.goingnowhere.org/huntthenooner}
       - NOONER_HUNT_KEY=${NOONER_HUNT_KEY}
       - NODE_ENV=production
+    ports:
+      - "3000:3000"
     volumes:
       - user_data:/home/node/bundle/bundle/programs/server/profilePictures
 
