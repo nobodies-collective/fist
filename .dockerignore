@@ -5,3 +5,7 @@ node_modules/
 
 # Project specific
 server/env.json
+
+# Docs and tooling config
+*.md
+.claude/

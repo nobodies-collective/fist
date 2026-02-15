@@ -1,41 +1,21 @@
-version: '3'
-
 volumes:
   mongo_dbdata:
   user_data:
   mongo_backup:
 
-networks:
-  traefik:
-    external: true
-
 services:
   fist:
-    image: piemonkey/volunteers-nowhere:2023-01-28
+    build: .
     restart: always
-    links:
+    depends_on:
       - mongo
-    networks:
-      - traefik
-      - default
     environment:
       - MONGO_URL=mongodb://mongo/volunteers
-      - ROOT_URL=https://fist.goingnowhere.org
-      - MAIL_URL=smtp://USER:PASSWORD@mail.euroburners.net:587
-      - NOONER_HUNT_API=https://fistbump.goingnowhere.org/huntthenooner
-      - NOONER_HUNT_KEY=NOONER_HUNT_KEY
+      - ROOT_URL=${ROOT_URL:-https://fist.nobodies.team}
+      - MAIL_URL=${MAIL_URL}
+      - NOONER_HUNT_API=${NOONER_HUNT_API:-https://fistbump.goingnowhere.org/huntthenooner}
+      - NOONER_HUNT_KEY=${NOONER_HUNT_KEY}
       - NODE_ENV=production
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.fist.rule=Host(`fist.goingnowhere.org`)
-      - traefik.http.routers.fist.entrypoints=web
-      - traefik.http.routers.fist.middlewares=SwitchToHttps
-      - traefik.http.routers.fist-ssl.rule=Host(`fist.goingnowhere.org`)
-      - traefik.http.routers.fist-ssl.entrypoints=web-secure
-      - traefik.http.routers.fist-ssl.tls.certresolver=burner
-      - traefik.http.routers.fist-ssl.tls=true
-      - traefik.http.middlewares.SwitchToHttps.redirectscheme.scheme=https
-      - traefik.http.services.app-fist.loadbalancer.server.port=3000
     volumes:
       - user_data:/home/node/bundle/bundle/programs/server/profilePictures
 
@@ -43,18 +23,14 @@ services:
     image: mongo:4.4.18
     command: mongod --storageEngine=wiredTiger
     restart: always
-    networks:
-      - default
     volumes:
       - mongo_dbdata:/data/db
-    labels:
-      - traefik.enable=false
 
   # TODO Switch this out for a different image, e.g. one with simple recovery instructions
   mongo-backup:
     image: tiredofit/mongodb-backup
     restart: always
-    links:
+    depends_on:
       - mongo
     environment:
       - DB_HOST=mongo
@@ -65,5 +41,3 @@ services:
       - COMPRESSION=XZ
     volumes:
       - mongo_backup:/backups
-    labels:
-      - traefik.enable=false
