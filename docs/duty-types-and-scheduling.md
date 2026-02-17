@@ -145,4 +145,4 @@ Several CSV exports are available for scheduling data:
 | Department rota | Metaleads | All confirmed signups across department teams |
 | All rotas | Managers | Every confirmed signup in the system |
 | Early entry | Leads/Managers | Volunteers with pre-event shifts who need early site access |
-| Cantina setup | Managers | Daily headcounts by dietary preference for feeding setup/strike crews |
+| Cantina setup | Managers | Daily build-period headcounts by dietary preference, allergies, and intolerances |

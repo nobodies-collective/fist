@@ -1,113 +1,99 @@
 # User Roles and Permissions
 
-FIST has a layered permission model tied to the organizational hierarchy. Permissions cascade upward: a department lead inherits visibility over all teams in their department.
+FIST uses scoped roles tied to organizational units (department/team IDs) plus global manager/admin roles.
 
-## Role Hierarchy
+## Effective Role Model
 
-```
-Admin
-  └── Manager
-        └── MetaLead (department level)
-              └── Lead (team level)
-                    └── NoInfo (special team with cross-team visibility)
-                          └── Volunteer (base role)
-```
+1. **Volunteer**: any authenticated user.
+2. **Lead**: confirmed signup to a team-level lead duty.
+3. **MetaLead**: confirmed signup to a department-level lead duty.
+4. **NoInfo**: NoInfo team lead (plus managers via auth helper).
+5. **Manager**: global management role in event scope.
+6. **Admin**: highest privileged role in event scope.
 
 ## Volunteer
 
-Every registered user is a volunteer. This is the base role.
+Can:
 
-**Can do:**
-- Register an account (email/password or magic link)
-- Fill out the volunteer form (profile, skills, dietary needs, emergency contact)
-- Browse available shifts, projects, and lead positions
-- Sign up for open shifts (immediately confirmed for public shifts)
-- Apply for approval-required shifts and lead positions
-- View their own dashboard with booked shifts and available openings
-- Edit their profile and form data
-- Set a profile picture
-- Choose preferred language (English, French, Spanish)
+- Register with email/password or magic link.
+- Verify email (email/password path).
+- Complete profile and volunteer form.
+- Browse and apply/signup for open duties.
+- View dashboard and booked duties.
+- Edit own profile, emails, and password.
 
-**Dashboard shows:**
-- Welcome message with profile picture
-- List of responsibilities (lead roles, if any)
-- "Your Shifts" table of confirmed and pending signups
-- "Shifts Need Help" list of open shifts they can sign up for, filterable by type
+Route access:
 
-## Lead
+- `/dashboard`, `/profile`, `/password`, `/department/:deptId`, `/department/:deptId/team/:teamId`.
 
-A lead manages a single team. Lead status is granted by signing up for (and being confirmed in) a lead position on a team.
+## Lead (Team)
 
-**Has all volunteer permissions, plus:**
-- View their team's lead dashboard (`/lead/team/:teamId`)
-- See team staffing stats (shifts confirmed vs. needed, volunteer count, pending requests)
-- Edit team settings (name, description, skills, quirks, policies)
-- Create and manage shift rotas (groups of recurring shifts)
-- Create and manage projects (multi-day commitments)
-- Review and approve/deny pending signup requests
-- "Voluntell" (enroll) specific users into shifts
-- Search and browse the full volunteer list (with completed profiles)
-- Filter volunteers by skill, quirk, or priority
-- Export team rota data as CSV
-- Request user contact information (with audit logging and reason required)
+Can do everything a volunteer can, plus:
 
-## MetaLead
+- Access `/lead/team/:teamId` for teams where they are a lead.
+- Edit team metadata.
+- Create rotas and projects.
+- Review pending requests.
+- Enroll volunteers directly ("Voluntell").
+- Export team rota CSV via `team.rota`.
+- Search users by name/email and ticket number.
+- Request user contact via `users.requestContact` (reason required, min 10 chars, audit logged).
 
-A metalead manages a department (a group of teams). Metalead status comes from being confirmed as a lead at the department level.
+## MetaLead (Department)
 
-**Has all lead permissions across their department, plus:**
-- View the department dashboard (`/metalead/department/:deptId`)
-- See aggregated stats: metalead/lead fill rates, shift coverage, volunteer count
-- Edit department settings
-- Create new teams within the department
-- Review lead applications across all teams in the department
-- View build and strike staffing reports for the department
-- Export department rota and early entry data as CSV
-- Manage early entry allocations for the department
+Can do lead-level tasks across their department, plus:
+
+- Access `/metalead/department/:deptId` for departments where they are lead.
+- Edit department settings.
+- Create teams.
+- Review lead applications across dept/team scope.
+- Export department rota CSV via `dept.rota`.
+- Export Early Entry CSV via `ee.csv`.
 
 ## NoInfo
 
-NoInfo is a special team within the Volunteers department. Members act as on-site shift coordinators during the event. NoInfo status is determined by being a lead of the "NoInfo" team (or being a manager).
+NoInfo status is resolved server-side via auth helper (`Volunteers.services.auth.isNoInfo()`), which treats managers as NoInfo-capable.
 
-**Has volunteer permissions, plus:**
-- Access the NoInfo dashboard (`/noinfo`) showing unfilled shifts for event time and strike
-- "Voluntell" volunteers into shifts in real time (enrolling them directly)
-- View the NoInfo user list with aggregate statistics
-- View any volunteer's full profile, form data, responsibilities, and booked shifts
-- Access user statistics (registered users, profiles filled, ticket holders, duty coverage, online users)
-- Filter shifts by event period or strike period
-- See which shifts are urgent and need immediate coverage
+Can:
+
+- Use NoInfo dashboards (`/noinfo`, `/noinfo/strike`) for urgent gap-filling workflows.
+- Access NoInfo user list (`/noinfo/userList`) and full user profile modal.
+- Use user statistics (`users.stats`).
+
+Important implementation note:
+
+- Router guard currently uses `isALead` for `/noinfo*` routes, so any lead can route-hit these pages. Some server methods inside NoInfo pages still enforce NoInfo-specific auth.
 
 ## Manager
 
-Managers have system-wide administrative access.
+Can do all of the above, plus:
 
-**Has all permissions above, plus:**
-- Access the manager dashboard (`/manager`) with global staffing overview
-- View and edit event settings (dates, periods, enrollment timing, cron configuration)
-- View and manage the full user list with role information
-- Promote/demote users to manager or admin roles
-- Create and manage departments
-- Manage email templates (enrollment, verification, notifications)
-- Approve or manage cached emails before sending
-- Export all rotas, cantina setup data, and early entry lists as CSV
-- Send mass shift reminder emails to all volunteers with signups
-- Import/export the full rota structure as JSON (for year-to-year migration)
-- Trigger event migration to a new year (copies structure, adjusts dates, preserves leads)
-- Ban users
-- Change user passwords
+- Access `/manager`, `/manager/eventSettings`, `/manager/emailForms`, `/manager/emailApproval`, `/manager/userList`.
+- Manage event settings (`settings.update`).
+- Manage email cache queue (`emailCache.get/send/delete/reGenerate`).
+- Send reminders (`email.sendShiftReminder`, `email.sendMassShiftReminder`, `email.sendReviewNotifications`).
+- Export all rota CSV (`all.rota`), cantina setup CSV (`cantina.setup`), and Early Entry CSV (`ee.csv`).
+- Trigger new-event migration (`event.new.event`) when preconditions are met.
+- Grant/revoke manager/admin roles from manager user list.
 
 ## Admin
 
-Admin is the highest privilege level.
+Admin is effectively manager-plus. In current UI, admin-specific distinction is mostly role assignment power and full access parity with managers.
 
-**Has all manager permissions, plus:**
-- Grant and revoke admin status for other users
-- Full system access
+## Access Gates (RequireAuth)
 
-## Permission Checks
+For protected routes, `RequireAuth` enforces this order:
 
-The system enforces permissions through:
-- **Route guards**: The `RequireAuth` component checks login, email verification, FIST open date, form completion, and role-specific access before rendering protected pages
-- **Method mixins**: Server methods use auth mixins (`isManager`, `isLead`, `isSameUserOrManager`, `isNoInfo`, `isAnyLead`) to validate permissions before executing
-- **Hierarchical roles**: The `alanning:roles` package manages role scopes. A lead role on a team ID also grants access to parent department views where applicable.
+1. User loaded and authenticated.
+2. At least one verified email.
+3. `fistOpenDate` gate (bypass for org-domain emails or leads).
+4. Route-specific auth test (for manager/lead/noinfo pages).
+5. Completed form (`profile.formFilled`) unless on `/profile`.
+
+## Permission Enforcement Layers
+
+1. **Client route guards**: `client/components/RequireAuth.jsx`.
+2. **Server method mixins**:
+   - Package mixins from `Volunteers.services.auth.mixins` (`isManager`, `isLead`, `isAnyLead`, `isSameUserOrManager`, etc.).
+   - Local mixins in `both/authMixins.js` (`isNoInfoMixin`, `isSameUserOrNoInfoMixin`).
+3. **Scoped roles hierarchy** via `alanning:roles` with team->department->division inheritance.

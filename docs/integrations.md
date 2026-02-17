@@ -1,157 +1,104 @@
 # Integrations
 
-FIST integrates with external systems for authentication, ticket verification, and email delivery.
+FIST integrates with ticket verification/auth providers and SMTP email delivery.
 
-## Fistbump
+## Fistbump (Primary External Integration)
 
-Fistbump is an external verification service that links the event's ticketing system to FIST. It provides two key functions:
+## Endpoints used
 
-### Magic Link Authentication
+1. Verify magic-link hash:
+   - `GET {NOONER_HUNT_API}/verify?key={NOONER_HUNT_KEY}&v={hash}`
+2. Lookup ticket by email/ticket:
+   - `GET {NOONER_HUNT_API}/huntthenooner?key={NOONER_HUNT_KEY}&nooner={email_or_QTK########}`
 
-Fistbump enables passwordless account creation and login:
+## Magic-link flow
 
-1. The event's communication system sends ticket holders a magic link containing a verification hash
-2. The link points to FIST: `/work?fornothing=HASH` (an optional `&path=destination` can be appended to redirect after login)
-3. FIST calls the Fistbump API to verify the hash
-4. The API returns the ticket holder's email and ticket ID
+1. User opens `/work?fornothing=HASH`.
+2. Client calls `accounts.fistbump.check`.
+3. Server verifies hash with Fistbump and returns:
+   - existing user + server login token, or
+   - new-user bootstrap payload (email/ticketId/raw data).
+4. Existing users are logged in via token.
+5. New users create account with prefilled email and verified status.
 
-**For existing users**: The system generates a login token and logs them in automatically.
+Security controls:
 
-**For new users**: The email is pre-filled and the ticket ID is pre-linked. The user only needs to set a password and agree to terms.
+- Replay protection via `fistbumpHashUsed` (same hash cannot be reused).
+- Rate limiting on `accounts.fistbump.check` in `server/rateLimiter.js`.
 
-This reduces friction for onboarding ticket holders who might not have created a FIST account yet.
+## Ticket verification flow
 
-### Ticket Verification
+Used during profile save and periodic background checks.
 
-When a volunteer enters a ticket ID (format: QTK12345678) on their profile form, FIST verifies it against the Fistbump API:
+Behavior:
 
-- **Valid ticket**: Ticket ID and raw ticket info are stored on the user record
-- **Invalid ticket**: The volunteer is informed but can continue without a ticket
-- **API error**: Treated gracefully; the rest of the form is still saved
+- Valid ticket -> set `ticketId` + `rawTicketInfo`.
+- No ticket found -> ticket fields removed (where applicable).
+- API errors -> user flow continues; ticket update may be skipped.
 
-The system also runs automated ticket checks:
-- **Daily**: Checks users without tickets to see if they've since purchased one
-- **Weekly**: Re-validates all ticket IDs to catch transfers or cancellations
+## Configuration
 
-### Configuration
+Source file: `server/config.js`.
 
-Fistbump integration is configured via `server/env.json`:
-- `noonerHuntApi`: Base URL for the Fistbump API
-- `noonerHuntKey`: API key for authentication
+Production:
 
-If these values are not configured, the system continues to operate without ticket verification.
+- Uses environment variables `NOONER_HUNT_API` and `NOONER_HUNT_KEY`.
 
-## Quicket
+Development:
 
-Quicket is a ticketing platform. FIST has a **legacy** integration for syncing guest lists.
+- Loads `server/env.json` and maps values onto runtime config keys.
+- Current code reads lower-cased keys (`noonerHuntApi`, `noonerHuntKey`) from JSON.
 
-**Current status**: The Quicket integration code exists but is no longer actively used. The Fistbump integration has largely replaced it.
+## Quicket (Legacy)
 
-**What it did:**
-- Pulled the full guest list from the Quicket API
-- Matched guests to FIST users by email address
-- Stored ticket information (barcode, name, email, raw guest data)
-- Detected ticket transfers and email changes
+`server/quicket.js` remains in repo but is marked as no longer used.
 
-**Configuration** (if ever re-enabled):
-- `quicketEventId`: The Quicket event identifier
-- `quicketApiKey`: API key
-- `quicketUserToken`: User authentication token
+Legacy responsibilities were:
+
+- Fetch guest list.
+- Match users by email.
+- Sync ticket metadata and detect changes/transfers.
 
 ## Email System
 
-FIST has a sophisticated email system for volunteer communications.
+Collections:
 
-### Architecture
+- `emailCache`
+- `emailLogs`
+- `emailFails`
 
-```
-Template Engine (EmailForms)
-        │
-        ▼
-   Email Cache ──→ Manual Review (if emailManualCheck enabled)
-        │
-        ▼
-   Send Queue ──→ SMTP Server
-        │
-        ▼
-   Email Logs / Email Fails
-```
+Pipeline:
 
-### Email Templates
+1. Template rendered with context.
+2. Cached in `emailCache`.
+3. If manual approval is enabled, manager approves per email.
+4. Sender drains queue with 2-second spacing.
+5. Success -> `emailLogs`; repeated failure -> `emailFails`.
 
-Templates are managed through the EmailForms package and can be edited by managers at `/manager/emailForms`. Each template has:
-- **Name**: Identifier (e.g., "voluntell", "reviewed")
-- **From address**: Sender email
-- **Subject line**: Can include template variables
-- **Body**: Uses Spacebars-style variable interpolation
+Retry/failure limits:
 
-**Available context variables in templates:**
+- Per-email retries up to 5.
+- Global sender abort after >10 consecutive failures.
 
-| Context | Variables |
-|---------|-----------|
-| User | First name, last name, email |
-| Shifts | List of shifts with title, team, start/end, status, enrollment info |
-| Projects | List of projects with title, team, dates, status |
-| Leads | List of lead positions with title, team, status |
-| UserTeams | List of teams the user has signups for, with team email |
-| Site | URL and site name |
+## Email methods
 
-### Email Types
+Manager-only operations include:
 
-| Template | Trigger | Content |
-|----------|---------|---------|
-| `enrollAccount` | Admin enrolls a new user | Invitation link to create account |
-| `verifyEmail` | User registers | Link to verify email address |
-| `voluntell` | Lead/NoInfo enrolls a volunteer | Notification of new assignments |
-| `reviewed` | Lead approves/denies an application | Decision notification |
-| `shiftReminder` | Manual trigger by manager | Reminder of all booked shifts |
+- Queue management: `emailCache.get/send/delete/reGenerate`.
+- Notifications: `email.sendShiftReminder`, `email.sendMassShiftReminder`, `email.sendReviewNotifications`.
 
-### Email Flow
+Templates in use:
 
-1. **Generation**: When a notification event occurs, the system renders the template with the user's current data
-2. **Caching**: The rendered email is stored in the `EmailCache` collection
-3. **Review** (optional): If `emailManualCheck` is enabled, emails wait for manager approval
-4. **Sending**: Emails are sent through SMTP, rate-limited to one every 2 seconds
-5. **Logging**: Successful sends are logged in `EmailLogs`
-6. **Retry**: Failed sends are retried up to 5 times
-7. **Failure tracking**: Permanently failed emails are stored in `EmailFails`
+- `enrollAccount`
+- `verifyEmail`
+- `voluntell`
+- `reviewed`
+- `shiftReminder`
 
-### Automatic Notifications
+## Fail-safe behavior
 
-When cron is enabled, two notification jobs run at the configured frequency:
+If external integrations are unavailable:
 
-1. **Enrollment notifications**: Finds volunteers with new `enrolled` signups that haven't been notified yet. Sends the `voluntell` template.
-2. **Review notifications**: Finds volunteers with newly reviewed (approved/denied) applications. Sends the `reviewed` template.
-
-After sending, the system marks the signups as `notification: true` to prevent duplicate emails.
-
-### Manual Email Controls
-
-Managers can:
-- **View queued emails** at `/manager/emailApproval`
-- **Send individual emails** from the queue
-- **Delete emails** that shouldn't be sent
-- **Regenerate emails** (re-render with current data, replacing the cached version)
-- **Send mass reminders** to all volunteers with signups (from the manager dashboard)
-
-### SMTP Configuration
-
-Email delivery requires an SMTP server configured via Meteor's standard `MAIL_URL` environment variable. The system sets:
-- Default "from" address: `FIST <fist@[event-domain]>`
-- Site name: `FIST [EventName] [EventYear]`
-
-## Configuration File
-
-External integration credentials are stored in `server/env.json` (not committed to the repository). Copy from `server/env.example` to create:
-
-```json
-{
-  "noonerHuntApi": "https://api.example.com",
-  "noonerHuntKey": "your-api-key",
-  "quicketEventId": "12345",
-  "quicketApiKey": "your-quicket-key",
-  "quicketUserToken": "your-quicket-token"
-}
-```
-
-All integrations are designed to fail gracefully. If credentials are missing or APIs are unavailable, the core FIST functionality continues to work — volunteers can still register, browse shifts, and sign up.
+- Core signup and volunteering still function.
+- Ticket-linked features degrade gracefully.
+- Notification sending behavior depends on email queue state and SMTP availability.

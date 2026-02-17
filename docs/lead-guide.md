@@ -1,192 +1,107 @@
 # Lead Guide
 
-This guide covers the day-to-day operations for team leads, department metaleads, and NoInfo coordinators.
+Operational guide for team leads, department metaleads, and NoInfo coordinators.
 
 ## Team Lead
 
-### Accessing Your Dashboard
+### Route
 
-Navigate to `/lead/team/:teamId` (or click your team name under "Responsibilities" on the volunteer dashboard).
+- `/lead/team/:teamId`
 
-### Dashboard Layout
+### Sidebar Actions
 
-**Sidebar:**
-- Team name (with link to public view)
-- List of current leads
-- Stats: shifts confirmed/needed, volunteer count, pending requests
-- Action buttons: Team Settings, Add Shift Rota, Add Project, Rota Export
+- Team settings edit.
+- Add shift rota.
+- Add project.
+- Team rota CSV export (`team.rota`).
 
-**Main area (splits into two panels if there are pending requests):**
-- **Pending requests** (right panel): Applications waiting for your review
-- **Duty summary** (left/full panel): Tabbed view of all your team's shifts and projects
+### Core Workflows
 
-### Setting Up Your Team
+1. Build duty structure (rotas/projects).
+2. Review pending requests (approve/deny).
+3. Voluntell users directly into duties.
+4. Track staffing and pending counts.
 
-1. **Edit team settings**: Click the wrench icon to update your team's name, description, skills, quirks, and policies
-2. **Create rotas**: Click "Add Shift Rota" to create a time range for a group of shifts. Within each rota, individual shifts are created
-3. **Create projects**: Click "Add Project" for multi-day commitments (typically setup/strike work)
+### Volunteer Search (Current UI)
 
-### Managing Shifts
+Lead search currently supports:
 
-Each rota tab shows its shifts with:
-- Date and time
-- Signup slots: how many are filled vs. needed
-- Individual volunteer signups with status
+- Name/email text search.
+- Ticket number search.
+- Include incomplete profiles toggle.
 
-### Reviewing Applications
+Note: skill/quirk/priority filters are not present in the current React search UI.
 
-When a volunteer applies for a shift or lead position that requires approval:
+### Contact Request
 
-1. The application appears in the "Pending Requests" panel
-2. Review the volunteer's profile and skills
-3. **Approve**: Confirms the signup; volunteer is notified
-4. **Deny**: Refuses the application; volunteer is notified
+Leads can request a volunteer email via `users.requestContact`.
 
-### Enrolling Volunteers ("Voluntelling")
-
-To directly assign a volunteer to a shift:
-
-1. From the shift detail, open the enrollment interface
-2. Search for volunteers by name, email, or skill
-3. Click "Voluntell" (labeled as "Enroll" in some views)
-4. The volunteer is immediately confirmed and will receive a notification email
-
-**When to voluntell:**
-- Filling urgent gaps during the event
-- Assigning known volunteers who've agreed verbally
-- Pre-assigning experienced volunteers to critical shifts
-
-### Searching for Volunteers
-
-The volunteer search (available to all leads) supports:
-- **Name or email**: Free text search
-- **By skill**: Filter volunteers who have specific skills
-- **By quirk**: Filter by preferred shift characteristics
-- **By priority**: Filter by urgency of unfilled positions
-- **Include incomplete profiles**: Toggle to see users who haven't finished their form
-
-### Exporting Data
-
-Click "Rota Export" to download a CSV of all confirmed signups for your team, including:
-- Shift name, start/end times
-- Volunteer name, email, ticket number, full name
-
-### Requesting Contact Info
-
-To get a volunteer's email address:
-1. Use the contact request feature
-2. Provide a reason (minimum 10 characters)
-3. The request is logged for audit purposes
-4. The volunteer's primary email is returned
+- Requires a reason string.
+- Minimum length: 10 characters.
+- Access request is audit-logged server-side.
 
 ## Department MetaLead
 
-### Accessing Your Dashboard
+### Route
 
-Navigate to `/metalead/department/:deptId` (or click your department name under "Responsibilities").
+- `/metalead/department/:deptId`
 
-### Dashboard Layout
+### Sidebar Actions
 
-**Sidebar:**
-- Department name (with link to public view)
-- Department leads
-- Stats: teams count, metalead/lead/shift fill rates, volunteer count, pending requests
-- Action buttons: Settings, Add Team, Early Entry management, Rota Export, Early Entry Export
+- Department settings edit.
+- Add team.
+- Early Entry tools.
+- Department rota CSV (`dept.rota`).
+- Early Entry CSV (`ee.csv`).
 
-**Main area:**
-- **Staffing Report**: Build and Strike coverage chart for all teams in the department
-- **Lead Requests**: Pending applications for lead positions (if any)
-- **Team List**: All teams with their leads, shift coverage, and quick access to team dashboards
+### Main Workflows
 
-### Department-Level Actions
+1. Review lead applications across department scope.
+2. Monitor build/strike staffing report.
+3. Manage team roster and structural changes.
 
-As a metalead, you can:
-
-1. **Create teams**: Add new teams to your department
-2. **Edit department settings**: Update name, description, etc.
-3. **Review lead applications**: Approve or deny lead candidates across all your teams
-4. **View team dashboards**: Click through to any team's lead dashboard
-5. **Manage early entry**: Allocate early entry passes for your department
-6. **Export data**: Department-wide rota CSV and early entry CSV
-
-### Monitoring Staffing
-
-The Build and Strike staffing report shows daily coverage across your department's teams. Use this to identify:
-- Teams that are understaffed for setup
-- Days with particularly low coverage
-- Whether lead positions are filled
+Additional dept-level operations exposed in current UI include team move and delete actions.
 
 ## NoInfo Coordinator
 
-NoInfo is a special team within the Volunteers department. Its members serve as on-site shift coordinators, matching available volunteers to unfilled shifts in real time.
+### Routes
 
-### Accessing NoInfo
+- `/noinfo` (event period)
+- `/noinfo/strike` (strike period)
+- `/noinfo/userList` (user search and profile modal)
 
-Navigate to `/noinfo` for event-time shifts or `/noinfo/strike` for strike shifts.
+### Core Workflow
 
-### NoInfo Dashboard
+1. Review open duties sorted by urgency.
+2. Identify near-term gaps.
+3. Select volunteer from NoInfo user list or direct interaction.
+4. Voluntell user into shift/project.
 
-**Sidebar:**
-- "NoInfo" header
-- Toggle between event shifts and strike shifts
+### User List Tools
 
-**Main area:**
-- List of shifts and projects that need volunteers, sorted by urgency
-- Each duty shows: team name, shift details, open slots
-- "Voluntell" button on each shift to enroll a volunteer
+- Aggregated user stats (`users.stats`).
+- Search users and open full profile panel (user info, volunteer form, responsibilities, booked duties).
 
-### NoInfo Workflow (During Event)
+### Permission Caveat
 
-1. **Check the dashboard** regularly to see which shifts need coverage
-2. **Identify urgent shifts**: Shifts starting soon with unfilled spots
-3. **Find volunteers**: Either from people visiting the NoInfo tent or by searching the user list
-4. **Voluntell**: Enroll the volunteer into the shift directly
-5. **The volunteer receives a notification** and the shift appears on their dashboard
+Router currently guards NoInfo pages with `isALead`, not strict `isNoInfo`. Some NoInfo server methods still require NoInfo authorization.
 
-### NoInfo User List (`/noinfo/userList`)
+## Recommended Cadence
 
-A comprehensive view of all registered volunteers with:
+### Pre-event
 
-**Statistics panel:**
-- Total registered users
-- Users with completed profiles and pictures
-- Ticket holders
-- Users with duties, leads, event-time roles
-- Users with 3+ event-time duties
-- Currently online users
+1. Leads finalize rotas/projects and staffing targets.
+2. Metaleads verify team structure and lead coverage.
+3. Both monitor pending applications and staffing deficits.
 
-**User list:**
-- Searchable by name, email, ticket number
-- Click any user to view their full profile:
-  - Profile picture
-  - Contact information
-  - Volunteer form data (skills, dietary info, etc.)
-  - Current responsibilities (lead roles)
-  - All booked shifts
+### During event
 
-### Tips for NoInfo Coordinators
+1. Leads process requests quickly and adjust assignments.
+2. Metaleads watch department-level risk.
+3. NoInfo fills urgent real-time gaps.
 
-- **Sort by urgency**: The dashboard prioritizes shifts that are starting soon and have low coverage
-- **Check skills**: Before voluntelling someone into a specialized shift (e.g., fire safety, driving), verify they have the required skills
-- **Event vs. Strike**: Use the toggle to switch between event-time and strike views. Strike coordination is critical as fewer volunteers remain after the event
-- **Use the user list**: When someone walks up to the NoInfo tent wanting to help, search for them and browse available shifts together
+### Strike
 
-## Common Workflows
-
-### Before the Event
-
-1. **Leads**: Set up team descriptions, create rotas and shifts, define skill/quirk requirements
-2. **Metaleads**: Review department structure, ensure lead positions are filled, create any new teams needed
-3. **All**: Monitor the staffing report as volunteers sign up; identify gaps early
-
-### During the Event
-
-1. **Leads**: Monitor pending requests, approve/deny quickly. Watch for shifts that need coverage.
-2. **Metaleads**: Keep an eye on cross-team staffing. Help leads who are struggling to fill shifts.
-3. **NoInfo**: The primary real-time coordination role. Match walk-up volunteers to urgent shifts.
-
-### After the Event (Strike)
-
-1. **Leads** of strike teams: Manage project signups for teardown
-2. **NoInfo**: Switch to strike view, help coordinate remaining volunteers
-3. **Managers**: Eventually trigger year rollover (see [Event Lifecycle](event-lifecycle.md))
+1. Strike teams keep project coverage current.
+2. NoInfo switches to strike duty board.
+3. Managers prepare rollover after operations close.

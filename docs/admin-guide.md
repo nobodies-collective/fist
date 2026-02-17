@@ -1,172 +1,164 @@
 # Admin Guide
 
-This guide covers the capabilities available to managers and admins.
+This guide documents manager/admin capabilities implemented in the current codebase.
 
-## Accessing Manager Features
+## Manager Routes
 
-Navigate to `/manager` (or click "Manager" in the header navigation). The manager dashboard is only visible to users with the manager or admin role.
+- `/manager`
+- `/manager/eventSettings`
+- `/manager/emailForms`
+- `/manager/emailApproval`
+- `/manager/userList`
 
-## Manager Dashboard
+All are protected by `RequireAuth` with `authTest="isManager"`.
 
-The main dashboard (`/manager`) shows:
+## Manager Dashboard (`/manager`)
 
 ### Sidebar
-- **Global staffing stats**: Leads (occupied/total), MetaLeads (occupied/total), Shifts (booked/total)
-- **Action buttons**:
-  - Event Settings
-  - New Department
-  - Cantina Setup Export (CSV)
-  - Rota Export (CSV of all rotas)
-  - Early Entry management
-  - Early Entry Export (CSV)
-- **Danger Zone**:
-  - Send Reminders to everyone (mass email)
-  - Prepare FIST for a new event (migration wizard)
 
-### Main Area
-- **Staffing Report: Setup and Strike** — a visual report showing volunteer coverage across the build and strike periods for all departments
+- Staffing totals: leads, metaleads, shifts.
+- Event Settings.
+- New Department.
+- Cantina Set-up CSV export (`cantina.setup`).
+- Global rota CSV export (`all.rota`).
+- Early Entry tools + CSV export (`ee.csv`).
+- Danger Zone:
+  - Send Reminders to everyone (`email.sendMassShiftReminder`).
+  - Prepare FIST for a new event (`event.new.event`).
 
-## Event Settings
+### Main Pane
 
-Navigate to `/manager/eventSettings` to configure:
+- Build and Strike staffing report.
 
-- **Event dates**: Event period, build period, strike period
-- **FIST open date**: When general volunteers can access the system
-- **Early entry settings**: Max passes, close date, requirement end time
-- **Barrios arrival date**: When camp organizers can arrive
-- **Cron frequency**: How often automated emails are sent (e.g., "every 15 mins"). Leave empty to disable.
-- **Email manual check**: Toggle whether emails require manager approval before sending
+## Event Settings (`/manager/eventSettings`)
 
-Changes take effect immediately. Cron jobs automatically restart with new frequency settings.
+Backed by `settings.update` and `SettingsSchema`.
 
-## User Management
+Editable fields:
 
-### User List (`/manager/userList`)
+- `previousEventName`
+- `eventPeriod`
+- `buildPeriod`
+- `strikePeriod`
+- `earlyEntryMax`
+- `barriosArrivalDate`
+- `fistOpenDate`
+- `earlyEntryClose`
+- `earlyEntryRequirementEnd`
+- `cronFrequency`
+- `emailManualCheck`
 
-A searchable, paginated list of all users with:
-- Name, nickname, email
-- Online status and last login
-- Ticket ID
-- Account creation date
-- Current roles (manager, admin, lead)
-- Banned status
+Read-only field:
 
-**Search options:**
-- By name or email
-- By ticket number
-- Include users with incomplete profiles (toggle)
+- `eventName` (disabled in current form)
 
-**Actions per user:**
-- View full profile
-- Change password
-- Make/remove Manager role
-- Make/remove Admin role
-- Ban/unban user
+Behavior:
 
-### Email Approval (`/manager/emailApproval`)
+- Changes apply immediately.
+- Cron observer reloads schedules on settings changes.
+- `cronFrequency` is interpolated into `every {cronFrequency}` for notification jobs (for example, `15 mins`).
 
-When `emailManualCheck` is enabled, all outgoing emails are queued for review. Managers can:
-- View pending emails
-- Approve and send individual emails
-- Delete emails that shouldn't be sent
-- Regenerate an email (re-render the template with current data)
+## User Management (`/manager/userList`)
 
-### Email Templates (`/manager/emailForms`)
+Current manager controls include:
 
-Manage the templates used for notification emails:
-- **enrollAccount**: Invitation email for new users
-- **verifyEmail**: Email verification link
-- **voluntell**: Notification when a user is enrolled by a lead
-- **reviewed**: Notification when a signup is approved or denied
-- **shiftReminder**: Pre-event reminder of booked shifts
+- View detailed user profile modal.
+- Send enrollment email (`Accounts.sendEnrollment`).
+- Send review summary (`email.sendReviewNotifications`).
+- Send shift reminder (`email.sendShiftReminder`).
+- Grant/revoke manager role.
+- Grant/revoke admin role.
 
-Templates use Spacebars-style syntax with context variables for user data, shift details, and team information.
+Important current-state note:
 
-## Department Management
+- Ban/unban and direct password-change controls are not exposed in the current React user list controls.
+- `Accounts.adminChangeUserPassword` exists server-side but has no active manager UI in this codebase.
 
-From the manager dashboard sidebar, click "New Department" to create a department. Each department:
-- Belongs to the NOrg division
-- Automatically gets a metalead position created
-- Appears in the organizational hierarchy for leads and volunteers
+## Email Operations
 
-Departments can be edited from their dashboard pages.
+### Templates (`/manager/emailForms`)
 
-## Data Exports
+Managers maintain templates used by:
 
-### Rota Exports (CSV)
+- `enrollAccount`
+- `verifyEmail`
+- `voluntell`
+- `reviewed`
+- `shiftReminder`
 
-| Export | Button | Content |
-|--------|--------|---------|
-| All Rotas | "Rota Export" on manager dashboard | Every confirmed signup: shift, dates, volunteer name, email, ticket, full name |
-| Cantina Setup | "Cantina Set-up Export" | Daily headcounts during build period by dietary preference (omnivore, vegetarian, vegan, fish) and allergy/intolerance counts |
-| Early Entry | "Early Entry" | Volunteers with pre-event shifts: arrival date, shift progression, team assignments |
+### Queue Approval (`/manager/emailApproval`)
 
-### Rota JSON Export/Import
+Queue methods:
 
-For year-to-year migration or bulk editing of the shift structure.
+- `emailCache.get`
+- `emailCache.send`
+- `emailCache.delete`
+- `emailCache.reGenerate`
 
-**Export** (`/manager` > accessed via methods):
-- Exports the full organizational structure as JSON
-- Includes: settings, departments, teams, rotas, shifts, projects, lead positions
-- References use names (not IDs) for portability
+When `emailManualCheck` is off, cached emails are auto-sent by cron job.
 
-**Import** (`/manager` > Rota Import):
-- Upload a JSON file with the full structure
-- System recreates all departments, teams, rotas, shifts, projects, and leads
-- Dates are shifted relative to the event period difference
-- Replaces existing structure (destructive operation)
+## Exports
 
-## Mass Communications
+### CSV Exports
 
-### Send Reminders to Everyone
-Sends the `shiftReminder` email template to every user who has at least one confirmed or pending signup. Emails are rate-limited (one every 2 seconds) and go through the email cache system.
+| Method | Purpose | Scope |
+|--------|---------|-------|
+| `team.rota` | Confirmed team signups export | Lead |
+| `dept.rota` | Confirmed department signups export | MetaLead |
+| `all.rota` | Confirmed global signups export | Manager |
+| `ee.csv` | Early-entry planning export | Lead/MetaLead/Manager |
+| `cantina.setup` | Build-period food headcount and dietary/allergy counts | Manager |
 
-**Warning**: This sends to everyone, even if they already received a reminder. Use sparingly.
+### JSON Structure Import/Export
 
-### Automatic Notifications
-When cron is enabled, the system automatically sends:
-- **Enrollment notifications**: To users who were voluntold, sent in batches at the configured cron frequency
-- **Review notifications**: To users whose applications were approved or denied
+Methods exist:
+
+- `rota.all.export`
+- `rota.all.import`
+
+Current UI note:
+
+- The current manager dashboard does not expose JSON import/export buttons in active routes.
+- Use method/API invocation directly if this workflow is required.
 
 ## New Event Migration
 
-The "Prepare FIST for a new event" button opens a migration wizard:
+Migration method:
 
-1. Enter the new event name and event dates
-2. The system:
-   - Copies volunteer forms, departments, teams, rotas, shifts, projects, and lead positions
-   - Shifts all dates by the year difference
-   - Preserves confirmed lead signups (carrying over the lead roster)
-   - Resets all volunteer ticket IDs
-   - Clears non-lead signups
-3. After migration, review event settings to confirm dates are correct
+- `event.new.event`
 
-**Important**: Manager and admin roles must be re-granted manually for the new event scope. The first admin role needs to be set directly in the database or preserved from before the migration.
+What it does:
 
-## Monitoring
+1. Clones org structure and duties from previous event scope.
+2. Copies volunteer forms.
+3. Preserves confirmed lead signups.
+4. Shifts dates by event-start day delta.
+5. Updates event settings (`eventName`, `previousEventName`, periods).
+6. Clears all user ticket IDs/raw ticket info.
 
-### Staffing Reports
-The manager dashboard shows a Build and Strike staffing report. Department dashboards show the same for their scope. These reports help identify teams that are under-staffed for setup and teardown.
+Critical limitation:
 
-### User Statistics
-Available via the NoInfo user list, showing:
-- Total registered users
-- Users with completed profiles
-- Users with profile pictures
-- Ticket holders
-- Users with any duties
-- Users who are leads
-- Users with event-time duties
-- Users with 3+ event-time duties
-- Currently online users
+- Migration depends on `Volunteers.eventName` in `both/init.js` already being moved to the new event scope by a developer.
+- If that prerequisite is not met, the UI shows a "developer required" message and migration cannot proceed from manager UI alone.
 
-## Troubleshooting
+## Cron And Automation
 
-### Orphaned Signups
-A garbage collection cron job runs every 3 days at 3am to clean up signups that reference deleted duties. Orphaned signups are backed up to `signupGcBackup` before removal.
+Configured in `server/cron.js`.
 
-### Email Failures
-Failed emails (after 5 retries) are stored in the `emailFails` collection with error details. The system stops attempting sends after 10 successive failures to avoid overloading a broken SMTP server.
+When `cronFrequency` is set:
 
-### Ticket Verification
-The system runs daily checks for users missing tickets and weekly full re-validation. Results are processed gradually (every 20 seconds) to avoid API rate limits. These jobs stop after the event end date.
+- Enrollment notifications job.
+- Review notifications job.
+- Email cache sender (every 5 minutes, if manual check off).
+- Signup GC backup/removal (every 3 days at 03:00).
+- Ticket recheck jobs (daily/weekly + queue processor) when production or `devConfig.testTicketApi` is enabled.
+
+If `cronFrequency` is empty:
+
+- SyncedCron is stopped.
+
+## Troubleshooting Notes
+
+- Orphaned signup cleanup backups are stored in `signupGcBackup`.
+- Failed email retries move to `emailFails` after 5 retries.
+- Email sender hard-stops after >10 consecutive failures.

@@ -1,151 +1,129 @@
 # Volunteer Journey
 
-This document traces the complete experience of a volunteer from first visit to shift day.
+This document traces the volunteer flow from first visit to active participation.
 
-## 1. Discovery
+## 1. Landing And Discovery
 
-A volunteer arrives at the FIST homepage. Before the system opens (controlled by `fistOpenDate`), they see:
-- A countdown to when registration for on-site roles opens
-- A link to volunteer remotely before the event ("I can't wait, I want to volunteer now!")
-- An "About" section explaining what the event is
+The homepage (`/`) is public.
 
-After `fistOpenDate`, the homepage changes to show:
-- "For Information and Scheduling of Teams" tagline
-- A "Register now" button (or "Get to it" if already logged in)
+Before `fistOpenDate`, users see:
 
-## 2. Registration
+- Countdown timer.
+- Link to early/non-onsite volunteering (`orgConfig.joinUrl`).
+- About section.
 
-Two paths to create an account:
+After `fistOpenDate`, users see:
 
-### Standard Registration
-1. Click "Register" on the homepage
-2. Enter email address and password (minimum 6 characters)
-3. Agree to terms and conditions
-4. Account is created; redirect to email verification
+- FIST tagline.
+- CTA to register or go to dashboard.
+
+## 2. Registration Paths
+
+### Standard Email/Password
+
+1. Go to `/signup`.
+2. Enter email + password (minimum 6 chars).
+3. Pick UI language (`en`, `fr`, `es`).
+4. Accept Code of Conduct/GDPR checkbox.
+5. Account created; verification email required.
 
 ### Magic Link (Fistbump)
-1. Receive a magic link URL (e.g., from the event's ticketing/communication system)
-2. Click the link, which contains a verification hash (`/work?fornothing=HASH`)
-3. FIST verifies the hash against the Fistbump API
-4. If the email matches an existing account: auto-login via token
-5. If new user: pre-fill email (from ticket data), set a password, agree to terms
-6. Account is created with ticket ID already linked; email is pre-verified
 
-## 3. Email Verification
+1. Open `/work?fornothing=HASH[&path=/target]`.
+2. Server validates hash via Fistbump (`accounts.fistbump.check`).
+3. Existing user:
+   - Server returns a login token.
+   - Client logs in with `Meteor.loginWithToken`.
+4. New user:
+   - Email is prefilled and locked.
+   - User sets password and accepts terms.
+   - Account is created with `fistbumpHash`; matching email is auto-verified.
 
-- After standard registration, the volunteer must verify their email
-- A verification email is sent automatically
-- The volunteer clicks the link in the email to verify
-- Users arriving via magic link skip this step (their email is verified by the Fistbump system)
-- Unverified users are redirected to a "check your email" page on any protected route
+## 3. Verification And Access Gates
 
-## 4. Volunteer Form
+Protected routes are blocked until:
 
-Before accessing the dashboard, every volunteer must complete their profile form. The system redirects to `/profile` automatically if the form hasn't been filled.
+1. User is authenticated.
+2. User has at least one verified email.
+3. `fistOpenDate` has passed, unless:
+   - User has an org-domain email, or
+   - User is a lead.
+4. Profile form is completed (`profile.formFilled`), except while on `/profile`.
 
-**Information collected:**
+If verification is missing, user is redirected to `/verify-email`.
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| Ticket ID | No | Format: QTK12345678. Validated against ticket API |
-| Playa Name / Nickname | No | Display name used throughout the system |
-| First Name | Yes | |
-| Last Name | No | |
-| Language | No | English, French, or Spanish (sets UI language) |
-| Profile Picture | No | Upload for recognition |
-| How can you help? | No | Free text about background and abilities |
-| Burn event experience | No | Previous volunteering experience |
-| Skills | No | Multi-select from team-defined skill tags |
-| Shift quirks | No | What they look for in a shift (e.g., "work in the shade", "sober shift") |
-| Gender | No | Used only for shifts where gender balance is desirable |
-| Languages spoken | No | Checkboxes: English, French, Spanish, German, Italian, Other |
-| Food preference | No | Omnivore, Vegetarian, Vegan, Pescetarian |
-| Grave allergies | No | Celiac, Shellfish, Nuts/Peanuts, Tree nuts, Soy, Egg |
-| Food intolerances | No | Gluten, Peppers, Shellfish, Nuts, Egg, Lactose, Other |
-| Medical conditions | No | Confidential, used only in emergencies |
-| Emergency contact | Yes | Name, number, languages, relationship |
-| Anything else | No | Free text |
+## 4. Profile + Volunteer Form (`/profile`)
 
-After saving, the volunteer is redirected to their dashboard (or to wherever they were trying to go).
+The form persists data in two places:
 
-## 5. Browsing Available Shifts
+- `Meteor.users.profile` (name/nickname/language/picture/formFilled).
+- `volunteerForm` collection (about/skills/dietary/emergency/etc).
 
-The volunteer dashboard (`/dashboard`) has two main panels:
+Key validations:
 
-### Your Shifts (left panel, if any exist)
-A table of all confirmed and pending signups showing shift details and status.
+- `firstName`: required.
+- `emergencyContact`: required.
+- `ticketId`: optional, must match `QTK########` format when provided.
 
-### Shifts Need Help (right panel)
-A filterable list of open shifts across all teams. Volunteers can filter by:
-- **Shift type**: All, event-time shifts, setup/strike projects, lead positions
-- The list shows shifts that still have open spots
+Ticket behavior on submit:
 
-Volunteers can also browse by organizational structure:
-- `/department/:deptId` shows all teams in a department
-- `/department/:deptId/team/:teamId` shows a specific team's shifts
+- Valid ticket -> stored on user (`ticketId`, `rawTicketInfo`).
+- Invalid ticket/API issue -> rest of form still saved; user can continue.
 
-## 6. Signing Up
+## 5. Dashboard (`/dashboard`)
 
-The signup experience depends on the shift's **policy**:
+Volunteer dashboard includes:
 
-### Public Shifts
-- Click "Sign up" on any open shift
-- Immediately confirmed
-- Appears in "Your Shifts" on the dashboard
+- Responsibilities block (lead/metalead/manager/noinfo status).
+- Booked duties table (`confirmed` and `pending`, excluding lead signups in this view).
+- Filtered "Shifts Need Help" list.
 
-### Approval-Required Shifts
-- Click "Apply" on the shift
-- Status set to "pending"
-- The team lead sees the application in their pending requests queue
-- Lead approves or denies
-- Volunteer is notified via email of the decision
+## 6. Browsing And Signup
 
-### Lead Positions
-- All lead positions require approval
-- The volunteer applies; metaleads or managers review
-- Upon confirmation, the volunteer gains lead permissions for that team
+Shift browsing routes (`/department/:deptId`, `/department/:deptId/team/:teamId`) are protected routes; they are not public to anonymous users.
 
-## 7. Being "Voluntold"
+Signup behavior depends on duty policy:
 
-Leads and NoInfo coordinators can directly enroll volunteers into shifts. This is called "voluntelling" in the system.
+- `public`: immediate `confirmed` signup.
+- `requireApproval`: `pending` signup until reviewed.
 
-- The volunteer receives an enrollment notification email
-- The signup appears on their dashboard as confirmed
-- This is commonly used during the event when NoInfo needs to fill urgent gaps
+Lead roles are represented as lead duties and reviewed through lead/metalead workflows.
+
+## 7. Voluntelling
+
+Leads and NoInfo operators can directly enroll volunteers via signup insert with `enrolled: true`.
+
+Effects:
+
+- Signup enters as confirmed assignment.
+- Enrollment notification pipeline can send `voluntell` email.
 
 ## 8. Notifications
 
-Volunteers receive emails at several points:
+Main templates/events:
 
-| Trigger | Template | Content |
-|---------|----------|---------|
-| After being voluntold | `voluntell` | Lists newly enrolled shifts/projects/leads |
-| After lead reviews signup | `reviewed` | Approval or denial of pending applications |
-| Before event (if enabled) | `shiftReminder` | Reminder of all confirmed shifts |
-| Account enrollment | `enrollAccount` | Invitation link to join FIST |
-| Email verification | `verifyEmail` | Link to verify email address |
+- `verifyEmail`: registration email verification.
+- `enrollAccount`: manager invitation.
+- `voluntell`: enrollment notices.
+- `reviewed`: review outcomes.
+- `shiftReminder`: reminders.
 
-Notification frequency is controlled by the cron settings (configurable by managers). Emails can also be manually reviewed before sending if `emailManualCheck` is enabled.
+Delivery model:
 
-## 9. During the Event
+- Render to `emailCache` first.
+- Optionally wait for manager approval if `emailManualCheck` is enabled.
+- Send path rate-limited (2s spacing).
 
-On-site, volunteers:
-- Check their dashboard for upcoming shifts
-- May be approached by NoInfo coordinators to fill urgent openings
-- Can continue signing up for shifts via the web app
-- See "Urgent Shifts Today" and "Urgent Shifts this Week" indicators
+## 9. Password Routes
 
-## 10. Access Gates
+- `/password-reset`: self-service password reset request.
+- `/password`: password change (requires auth and completed form because of route guard order).
 
-The system enforces several gates along the journey:
+## 10. NoInfo Event-Time Coordination
 
-```
-Visit homepage
-  └── Must be logged in → redirect to /login
-        └── Must have verified email → redirect to /verify-email
-              └── Must be after fistOpenDate (unless org member or lead) → redirect to /
-                    └── Must have filled volunteer form → redirect to /profile
-                          └── Dashboard and shift browsing available
-```
+NoInfo pages provide urgent duty filling (`/noinfo`, `/noinfo/strike`) and user search (`/noinfo/userList`) for onsite operations.
 
-Organization members (email ending in the configured domain) and existing leads bypass the `fistOpenDate` gate, allowing them to set up the system before it opens to the general volunteer population.
+Implementation note:
+
+- Current router allows all leads to access `/noinfo*` routes (`authTest="isALead"`).
+- Some server methods used there still enforce NoInfo-specific authorization.

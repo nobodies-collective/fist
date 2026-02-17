@@ -1,123 +1,125 @@
 # Organizational Structure
 
-FIST models a hierarchical organization with three levels: Division, Department, and Team.
+FIST models a three-level hierarchy:
 
-## Hierarchy
-
-```
-Division (NOrg)
-├── Department: SLAP
-│   ├── Team: Power
-│   ├── Team: Sound
-│   └── Team: Lights
-├── Department: Volunteers
-│   ├── Team: NoInfo
-│   ├── Team: DVS (Dept of Volunteer Servicing)
-│   └── Team: La Cantina
-├── Department: BDSM
-│   ├── Team: Build Crew
-│   ├── Team: Strike Crew
-│   ├── Team: Toolhaus
-│   ├── Team: LNT (Leave No Trace)
-│   └── Team: Designated Driver
-├── Department: Participants Wellness
-│   └── Team: Site Lead & Site Mgmt Crew
-├── Department: Production
-│   ├── Team: Event Production Office
-│   ├── Team: Ice Ice Baby!
-│   └── Team: Shit Ninjas
-├── Department: City Planning
-│   └── Team: Demarcation Team
-├── Department: Creativity
-│   ├── Team: Kunsthaus
-│   ├── Team: Art Tours
-│   ├── Team: Art Cars
-│   ├── Team: Innovation
-│   └── Team: Ohana House
-├── Department: GG&P (Gate, Greeters & Perimeter)
-│   ├── Team: Grumpy Katz Gate Krew
-│   ├── Team: Perimeter Crew
-│   └── Team: Greeters
-└── Department: Malfare
-    ├── Team: Fire Arena
-    ├── Team: Interpreters
-    ├── Team: Nomads
-    ├── Team: Malfare Office
-    └── Team: Welfare Enough
-```
+1. Division
+2. Department
+3. Team
 
 ## Division
 
-The top-level organizational container. In practice, there is one division called **NOrg** (representing the FixMe Organization). Divisions exist in the data model for flexibility but are not heavily used in the UI.
+Current default division:
 
-## Department
+- `NOrg`
 
-A department groups related teams under a shared leadership structure. Each department has:
+## Departments (Fixture Defaults)
 
-- **Name and description**
-- **Policy**: Controls visibility (typically `public`)
-- **MetaLead position**: Each department has at least one metalead (department-level lead)
-- **Parent**: Always belongs to a division
+- SLAP
+- Volunteers
+- BDSM
+- Participants Wellness
+- Production
+- City Planning
+- Creativity
+- GG&P
+- Malfare
 
-**Department examples and what they oversee:**
+## Teams By Department (Fixture Defaults)
 
-| Department | Scope |
-|------------|-------|
-| SLAP | Sound, Lights, And Power infrastructure |
-| Volunteers | Volunteer coordination, food service, on-site info |
-| BDSM | Build, Demolition, Site Management — physical construction and teardown |
-| Production | Event logistics, supplies, sanitation |
-| Malfare | Welfare, safety, emergency response, mediation |
-| GG&P | Gate operations, greeting, perimeter security |
-| Creativity | Art support, innovation, accessible spaces |
-| City Planning | Site layout and demarcation |
-| Participants Wellness | Site safety and maintenance during event |
+### SLAP
 
-## Team
+- Power
+- Sound
+- Lights
 
-A team is the operational unit where volunteers actually work. Each team has:
+### Volunteers
 
-- **Name and description**: Shown to volunteers when browsing shifts
-- **Parent department**: Determines which metalead oversees it
-- **Skills**: Tags indicating what skills are useful (e.g., "fire safety experience", "languages", "licensed to drive in Spain")
-- **Quirks**: Tags indicating shift characteristics (e.g., "sober shift", "work in the shade", "intense work")
-- **Location**: Optional (e.g., "cantina" for food service)
-- **Policy**: Access control for shifts under this team
-- **Email**: Contact address for the team
-- **Lead positions**: Each team has at least one lead role
+- NoInfo
+- DVS
+- La Cantina
 
-## Team Characteristics
+### BDSM
 
-Teams vary significantly in their operational model:
+- Build Crew
+- Strike Crew
+- Toolhaus
+- LNT
+- Designated Driver
 
-**Setup/Strike teams** (Build Crew, Strike Crew, DVS, Toolhaus, LNT):
-- Work full days with a siesta break
-- Not shift-based during their primary period
-- Use "projects" rather than "shifts" for scheduling
+### Participants Wellness
 
-**Event-time shift teams** (NoInfo, Gate Krew, Nomads, Ice, etc.):
-- Work in defined shift rotations (typically 4-6 hours)
-- Use "rotas" to define recurring shift patterns
+- Site Lead & Site Management Crew
 
-**Hybrid teams** (Power, LNT, La Cantina):
-- Full days during setup/strike, shift-based during event time
+### Production
 
-**Small/specialized teams** (Art Cars, Innovation, Fire Arena):
-- Small rosters, event-time only, shorter shifts
+- Event Production Office
+- Ice Ice Baby!
+- Shit Ninjas
 
-## How Structure Affects Permissions
+### City Planning
 
-The hierarchy creates a cascading permission model:
+- Demarcation Team
 
-1. A **team lead** can manage shifts, approve signups, and voluntell users for their team
-2. A **metalead** has lead-level access across all teams in their department
-3. A **manager** has access to everything across the entire organization
+### Creativity
 
-Role inheritance uses Meteor's `alanning:roles` package with scoped roles. When a department or team is created, a corresponding role is created and added to the parent's role hierarchy.
+- Kunsthaus
+- Art tours
+- Art cars
+- Innovation
+- Ohana House
 
-## Creating and Modifying Structure
+### GG&P
 
-- **Managers** can create new departments (from the manager dashboard)
-- **Metaleads** can create new teams within their department
-- **Leads** can edit their own team's settings (name, description, skills, quirks)
-- The full structure can be exported as JSON and re-imported for the next year's event (see [Event Lifecycle](event-lifecycle.md))
+- Grumpy Katz Gate Krew
+- Perimeter Crew
+- Greeters
+
+### Malfare
+
+- Fire Arena
+- Interpreters
+- Nomads
+- Malfare Office
+- Welfare Enough
+
+## Data Characteristics
+
+## Department fields
+
+- name
+- description
+- policy
+- parentId (division)
+
+## Team fields
+
+- name
+- description
+- policy
+- parentId (department)
+- optional: skills, quirks, email, location
+
+## Lead role bootstrapping
+
+Fixture creation inserts lead duties automatically:
+
+- One Meta-Lead duty per department
+- One Lead duty per team
+
+It also creates role hierarchy links:
+
+- department role -> parent division role
+- team role -> parent department role
+
+## Permission Impact
+
+1. Team leads manage their own team duties/signups.
+2. MetaLeads manage department-level operations and oversight.
+3. Managers/admins have global scope.
+
+## Operational Notes
+
+- Managers can create departments.
+- MetaLeads can create teams.
+- Team leads can edit team settings.
+- Team move/delete flows exist at department dashboard level in current UI.

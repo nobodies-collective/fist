@@ -36,7 +36,7 @@ The goal is that other participatory events could fork FIST and configure it for
 - **Decentralized management**: Leads manage their own teams. Metaleads oversee departments. Managers handle system-wide settings. No single bottleneck.
 - **Progressive disclosure**: Volunteers see only what they need (browse shifts, sign up). Leads see team management tools. Managers see the full system.
 - **Low friction onboarding**: Magic link authentication via Fistbump lets ticket holders create accounts with minimal steps.
-- **Transparency**: Public views of departments and teams let anyone browse what's available before committing.
+- **Transparency**: Logged-in volunteers can browse departments and teams before committing.
 
 ## Technology
 
