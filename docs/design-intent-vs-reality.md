@@ -1,8 +1,8 @@
-# Codex Would Do Better
+# Design Intent vs Implementation Reality
 
 This document is intentionally opinionated.
 
-It infers the product's true goals from behavior and domain context, compares those goals to current implementation reality, and proposes a better rebuild direction.
+It infers the product's true goals from behavior and domain context, compares those goals to current implementation reality, and proposes a better rebuild direction. A greenfield rewrite should not replicate the current system 1:1 — it should preserve the domain logic while removing accidental complexity.
 
 ## Inferred Product Goals
 
@@ -15,7 +15,7 @@ It infers the product's true goals from behavior and domain context, compares th
 
 ## Gap Analysis: Goal vs Reality
 
-## 1) Goal: Clear, trustworthy permissions
+### 1) Goal: Clear, trustworthy permissions
 
 Current reality gaps:
 
@@ -28,7 +28,7 @@ Why this is a problem:
 - Role boundaries are hard to reason about.
 - Operational trust degrades when policy and behavior diverge.
 
-## 2) Goal: Low-friction operations for managers
+### 2) Goal: Low-friction operations for managers
 
 Current reality gaps:
 
@@ -41,7 +41,7 @@ Why this is a problem:
 - Managers cannot fully operate the system independently.
 - "Self-service" admin workflows become pseudo-manual workflows.
 
-## 3) Goal: Fast staffing decisions, especially under pressure
+### 3) Goal: Fast staffing decisions, especially under pressure
 
 Current reality gaps:
 
@@ -54,7 +54,7 @@ Why this is a problem:
 - Staffing velocity depends on operator understanding of hidden rules.
 - Debugging wrong notifications or assignment states is harder than it should be.
 
-## 4) Goal: Predictable annual rollover
+### 4) Goal: Predictable annual rollover
 
 Current reality gaps:
 
@@ -66,7 +66,7 @@ Why this is a problem:
 
 - Rollover is one of the highest-risk operations and currently has avoidable sharp edges.
 
-## 5) Goal: Maintainable engineering surface
+### 5) Goal: Maintainable engineering surface
 
 Current reality gaps:
 
@@ -80,7 +80,7 @@ Why this is a problem:
 - Small changes have high regression risk.
 - Rebuild or migration work is harder than necessary.
 
-## 6) Goal: Privacy and compliance confidence
+### 6) Goal: Privacy and compliance confidence
 
 Current reality gaps:
 
@@ -103,7 +103,7 @@ Why this is a problem:
 
 ## What A Better Rebuild Should Optimize For
 
-## Product principles
+### Product principles
 
 1. Manager can operate the system end-to-end without developer intervention.
 2. Permission behavior is explicit, testable, and identical across UI/API.
@@ -111,7 +111,7 @@ Why this is a problem:
 4. Migration/rollover is safe-by-default, reversible, and observable.
 5. Privacy-sensitive data follows strict least-privilege controls.
 
-## Architecture principles
+### Architecture principles
 
 1. Single typed API contract (no hidden method coupling).
 2. Single source of truth for role decisions (policy engine/RBAC layer).
@@ -119,33 +119,33 @@ Why this is a problem:
 4. Event scope is runtime data, never hardcoded in app source.
 5. First-class audit/events table for privileged actions.
 
-## Codex Proposed "Better" Scope (Not 1:1 Parity)
+## Proposed "Better" Scope (Not 1:1 Parity)
 
-## A) Fix contradictions first
+### A) Fix contradictions first
 
 1. Enforce strict NoInfo route and method permissions consistently.
 2. Align manager UI with existing capabilities (or remove dead capabilities).
 3. Make annual rollover fully UI/API driven with no code change pre-step.
 
-## B) Simplify domain model behavior
+### B) Simplify domain model behavior
 
 1. Keep `signups` but add immutable signup event log (`created`, `reviewed`, `enrolled`, `bailed`, `notified`).
 2. Replace implicit notification booleans with explicit notification events + dedupe key.
 3. Make early-entry derivation a tested query/service, not scattered logic.
 
-## C) Improve operator UX
+### C) Improve operator UX
 
 1. Add real staffing filters (skill, quirk, priority, availability windows).
 2. Add a "what changed" activity feed for leads/metaleads/managers.
 3. Add migration dry-run and diff preview before apply.
 
-## D) Improve safety and compliance
+### D) Improve safety and compliance
 
 1. Durable audit trail table for contact access and sensitive profile views.
 2. Field-level access policy for medical/emergency data.
 3. Built-in retention/deletion workflows and reports.
 
-## E) Reduce engineering drag
+### E) Reduce engineering drag
 
 1. Remove Blaze bridge and standardize on one UI stack.
 2. Collapse package/app behavioral split into explicit modules or services.

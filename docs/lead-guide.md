@@ -38,7 +38,7 @@ Leads can request a volunteer email via `users.requestContact`.
 
 - Requires a reason string.
 - Minimum length: 10 characters.
-- Access request is audit-logged server-side.
+- Access request is logged server-side (currently to console only; a rebuild should use a durable audit table).
 
 ## Department MetaLead
 

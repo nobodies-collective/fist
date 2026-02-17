@@ -4,14 +4,14 @@ FIST integrates with ticket verification/auth providers and SMTP email delivery.
 
 ## Fistbump (Primary External Integration)
 
-## Endpoints used
+### Endpoints used
 
 1. Verify magic-link hash:
    - `GET {NOONER_HUNT_API}/verify?key={NOONER_HUNT_KEY}&v={hash}`
 2. Lookup ticket by email/ticket:
    - `GET {NOONER_HUNT_API}/huntthenooner?key={NOONER_HUNT_KEY}&nooner={email_or_QTK########}`
 
-## Magic-link flow
+### Magic-link flow
 
 1. User opens `/work?fornothing=HASH`.
 2. Client calls `accounts.fistbump.check`.
@@ -26,7 +26,7 @@ Security controls:
 - Replay protection via `fistbumpHashUsed` (same hash cannot be reused).
 - Rate limiting on `accounts.fistbump.check` in `server/rateLimiter.js`.
 
-## Ticket verification flow
+### Ticket verification flow
 
 Used during profile save and periodic background checks.
 
@@ -36,7 +36,7 @@ Behavior:
 - No ticket found -> ticket fields removed (where applicable).
 - API errors -> user flow continues; ticket update may be skipped.
 
-## Configuration
+### Configuration
 
 Source file: `server/config.js`.
 

@@ -84,14 +84,14 @@ Current default division:
 
 ## Data Characteristics
 
-## Department fields
+### Department fields
 
 - name
 - description
 - policy
 - parentId (division)
 
-## Team fields
+### Team fields
 
 - name
 - description
@@ -99,7 +99,7 @@ Current default division:
 - parentId (department)
 - optional: skills, quirks, email, location
 
-## Lead role bootstrapping
+### Lead role bootstrapping
 
 Fixture creation inserts lead duties automatically:
 
@@ -111,7 +111,7 @@ It also creates role hierarchy links:
 - department role -> parent division role
 - team role -> parent department role
 
-## Permission Impact
+### Permission Impact
 
 1. Team leads manage their own team duties/signups.
 2. MetaLeads manage department-level operations and oversight.

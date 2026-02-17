@@ -117,7 +117,7 @@ Delivery model:
 ## 9. Password Routes
 
 - `/password-reset`: self-service password reset request.
-- `/password`: password change (requires auth and completed form because of route guard order).
+- `/password`: password change (requires auth and completed form because of route guard order — this creates a catch-22 where users must complete their profile before changing their password; a rebuild should allow password changes without a completed profile).
 
 ## 10. NoInfo Event-Time Coordination
 

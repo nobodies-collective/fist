@@ -118,6 +118,38 @@ Important behavior details:
 - Early Entry export groups signups by user/email and computes `eeDate = first_start - 1 day`.
 - Cantina export is build-period scoped and combines project coverage + shift-derived daily unique counts.
 
+### CSV export column reference
+
+A rebuild must produce compatible export formats. All date formatting uses `DD/MM/YYYY HH:mm` for shifts and `DD/MM/YYYY` for projects unless noted.
+
+**`team.rota`** (7 columns): `shift`, `start`, `end`, `name`, `email`, `ticket`, `fullName`
+
+**`dept.rota`** (8 columns): `shift`, `start`, `end`, `name`, `email`, `ticket`, `fullName`, `team`
+
+**`all.rota`** (8 columns): `team`, `shift`, `start`, `end`, `name`, `email`, `ticket`, `fullName`
+
+**`ee.csv`** (11 columns, one row per user, grouped from multiple signups):
+
+| Column | Description |
+|--------|-------------|
+| `eeDate` | Earliest signup start minus 1 day (`DD/MM/YY`) |
+| `start` | Earliest signup start |
+| `end` | Latest signup end |
+| `team` | Team of earliest signup |
+| `title` | Duty title of earliest signup |
+| `name` | Display name |
+| `email` | Primary email |
+| `ticket` | Ticket ID or empty |
+| `fullName` | First + last name |
+| `teamProgression` | All signups as `"team: title -> team: title -> ..."` |
+| `dates` | All date ranges as `"start - end // start - end // ..."` |
+
+**`cantina.setup`** (19 columns, one row per build-period day):
+- `date`, `total`
+- Diet groups: `omnivore`, `vegetarian`, `vegan`, `fish`
+- Allergies: `celiac allergy`, `shellfish allergy`, `nuts/peanuts allergy`, `treenuts allergy`, `soy allergy`, `egg allergy`
+- Intolerances: `gluten intolerance`, `peppers intolerance`, `shellfish intolerance`, `nuts intolerance`, `egg intolerance`, `lactose intolerance`, `other intolerance`
+
 ### Urgency scoring (NoInfo/open-duty ranking)
 
 Implemented in package aggregations (`packages/meteor-volunteers/both/methods/aggregations.js`).

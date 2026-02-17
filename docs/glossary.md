@@ -36,7 +36,7 @@ Canonical terminology for FIST, aligned with current UI labels and fixture names
 
 | Term | Definition |
 |------|------------|
-| NOrg | Top-level division name in fixture data |
+| NOrg | Top-level division name in fixture data (short for "Nowhere Organization"; retained after FixMe rename) |
 | Department | Mid-level unit containing teams |
 | Team | Operational unit with shifts/projects/leads |
 
@@ -97,6 +97,8 @@ These names should match docs and UI where shown.
 | `pending` | Awaiting lead review |
 | `confirmed` | Accepted and assigned |
 | `refused` | Explicitly declined by reviewer |
+| `bailed` | Withdrawn after confirmation (by user or lead) |
+| `cancelled` | System-cancelled (e.g., duty deleted) |
 
 ## Integration Terms
 

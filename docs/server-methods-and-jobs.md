@@ -4,7 +4,7 @@ This is the authoritative method/job contract for this repository.
 
 ## 1. Local Method Catalog
 
-## Core methods (`server/methods.js`)
+### Core methods (`server/methods.js`)
 
 | Method | Auth | Input | Output / Side Effects |
 |-------|------|-------|------------------------|
@@ -28,7 +28,7 @@ This is the authoritative method/job contract for this repository.
 | `users.requestContact` | any lead | `{userId,reason}` | returns target email + display name; audit logs request |
 | `accounts.fistbump.check` | none | `{hash}` | existing-user token login payload or new-user bootstrap payload |
 
-## Settings methods (`both/methods.js`)
+### Settings methods (`both/methods.js`)
 
 | Method | Auth | Purpose |
 |-------|------|---------|
@@ -36,7 +36,7 @@ This is the authoritative method/job contract for this repository.
 | `settings.insert` | manager | insert settings doc |
 | `settings.update` | manager | update settings doc (modifier validation) |
 
-## Email/notification methods (`server/email.js`)
+### Email/notification methods (`server/email.js`)
 
 | Method | Auth | Purpose |
 |-------|------|---------|
@@ -50,7 +50,7 @@ This is the authoritative method/job contract for this repository.
 
 Additional method wrappers in `server/accounts.js` apply custom mixins to MeteorProfile methods (send enroll, email add/remove/primary, verification).
 
-## Package method surface (`packages/meteor-volunteers`)
+### Package method surface (`packages/meteor-volunteers`)
 
 These are called directly from UI and are required for full parity:
 

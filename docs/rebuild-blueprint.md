@@ -15,7 +15,7 @@ A successful rebuild must support:
 
 ## 2. Suggested Architecture
 
-## Backend services
+### Backend services
 
 - Auth service
 - Volunteer profile service
@@ -25,7 +25,7 @@ A successful rebuild must support:
 - Ticket integration adapter
 - Scheduler/worker service
 
-## Frontend surfaces
+### Frontend surfaces
 
 - Public homepage
 - Auth screens
@@ -35,7 +35,7 @@ A successful rebuild must support:
 - NoInfo dashboard
 - Manager tools
 
-## Persistence
+### Persistence
 
 - Primary DB for users, org, duties, signups, settings.
 - Queue table/stream for email and ticket checks.
@@ -84,13 +84,13 @@ Design as REST/GraphQL/RPC, but keep:
 
 ## 6. Core Logic Details
 
-## Volunteer profile save
+### Volunteer profile save
 
 - Parse ticket as `QTK########`.
 - Save profile + volunteerForm even if ticket validation fails.
 - Set `profile.formFilled=true` only when submission passes schema validation.
 
-## Signup review/enrollment
+### Signup review/enrollment
 
 - `public` -> confirmed immediately.
 - `requireApproval` -> pending until reviewer action.
@@ -98,14 +98,14 @@ Design as REST/GraphQL/RPC, but keep:
 - Notification flags must prevent duplicate reminders.
 - Enforce double-booking and capacity checks before insert.
 
-## Export logic
+### Export logic
 
 - Keep output columns compatible with current CSV exports.
 - Early Entry export groups by user and computes earliest arrival date (`first_start - 1 day`).
 - Cantina export is build-period daily aggregation with dietary/allergy/intolerance columns.
 - Open-duty urgency ordering must match the scoring formulas documented in `docs/technical-spec.md`.
 
-## Migration logic
+### Migration logic
 
 - Support two flows:
   - annual clone with date shift (`event.new.event` behavior)
@@ -114,7 +114,7 @@ Design as REST/GraphQL/RPC, but keep:
 
 ## 7. Integrations
 
-## Fistbump adapter
+### Fistbump adapter
 
 - Implement `/verify` and `/huntthenooner` calls.
 - Return typed results and classify failures:
@@ -123,7 +123,7 @@ Design as REST/GraphQL/RPC, but keep:
   - hard failure
 - Keep replay protection for magic-link hashes.
 
-## Email adapter
+### Email adapter
 
 - Queue-first architecture with manual approval option.
 - Retry policy (5 tries per message).

@@ -50,6 +50,14 @@ When a volunteer is confirmed as a lead, they gain the corresponding role permis
 
 Tasks exist in the data model but are less commonly used. They represent one-off pieces of work that don't fit the shift or project pattern.
 
+**Properties:**
+- **Title**: Description of the task
+- **Start/End**: Datetime range
+- **Min/Max volunteers**: Staffing targets
+- **Priority and policy**: Same as shifts
+
+Tasks share the same signup mechanics as shifts but are typically used for ad-hoc work assignments rather than recurring schedules.
+
 ## Rotas (Shift Groups)
 
 A rota is a container that groups related shifts into a pattern. Rotas make it easier for leads to manage recurring shift schedules.
@@ -77,18 +85,27 @@ For example, the Gate Krew might have:
 A signup (the association between a volunteer and a duty) progresses through these statuses:
 
 ```
-                    ┌──────────┐
-                    │ pending  │ ← Volunteer applies (approval-required)
-                    └────┬─────┘
-                         │
-              ┌──────────┴──────────┐
-              │                     │
-        ┌─────▼─────┐        ┌─────▼─────┐
-        │ confirmed │        │  refused  │
-        └───────────┘        └───────────┘
+                          ┌──────────┐
+                          │ pending  │ ← Volunteer applies (approval-required)
+                          └────┬─────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+              ┌─────▼─────┐        ┌─────▼─────┐
+              │ confirmed │        │  refused  │
+              └─────┬─────┘        └───────────┘
+                    │
+           ┌────────┴────────┐
+           │                 │
+     ┌─────▼─────┐    ┌─────▼──────┐
+     │  bailed   │    │ cancelled  │
+     └───────────┘    └────────────┘
 ```
 
-For public shifts, the signup goes directly to `confirmed` (skipping `pending`).
+- For **public** duties, the signup goes directly to `confirmed` (skipping `pending`).
+- For **voluntell** (direct enrollment by lead/NoInfo), the signup goes directly to `confirmed` with `enrolled=true`.
+- **Bailed**: Volunteer or lead withdraws after confirmation.
+- **Cancelled**: System removes signup (e.g., referenced duty deleted by signup GC).
 
 **Additional signup metadata:**
 - `enrolled`: True if a lead/NoInfo voluntold the user (vs. self-signup)

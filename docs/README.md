@@ -24,6 +24,7 @@ This folder has two layers of documentation:
 | [Server Methods and Jobs](server-methods-and-jobs.md) | API method contracts, cron tasks, and rate limiting |
 | [Technical Specification](technical-spec.md) | Cross-stack implementation contract |
 | [Rebuild Blueprint](rebuild-blueprint.md) | Step-by-step rebuild guidance and acceptance criteria |
+| [Design Intent vs Reality](design-intent-vs-reality.md) | Gap analysis and architectural guidance for a greenfield rebuild |
 | [Glossary](glossary.md) | Canonical terms and UI naming |
 
 ## Source Of Truth Rule

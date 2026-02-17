@@ -158,7 +158,7 @@ Observed fields:
 - `end`
 - `priority`
 - `policy`
-- `staffing[]` (daily min/max)
+- `staffing[]` (array of `{ date: Date, min: Number, max: Number }` — per-day staffing targets within the project window)
 
 #### `lead`
 
@@ -180,7 +180,7 @@ Observed fields:
 - `parentId`
 - `shiftId`
 - `type` (`shift`, `project`, `lead`, `task`)
-- `status` (`pending`, `confirmed`, `refused`, etc by package)
+- `status` (`pending`, `confirmed`, `refused`, `bailed`, `cancelled`)
 - `enrolled` (voluntold flag)
 - `reviewed` (review processed flag)
 - `notification` (email notification sent flag)
