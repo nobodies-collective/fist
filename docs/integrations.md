@@ -11,7 +11,7 @@ Fistbump is an external verification service that links the event's ticketing sy
 Fistbump enables passwordless account creation and login:
 
 1. The event's communication system sends ticket holders a magic link containing a verification hash
-2. The link points to FIST: `/work?fornothing=HASH`
+2. The link points to FIST: `/work?fornothing=HASH` (an optional `&path=destination` can be appended to redirect after login)
 3. FIST calls the Fistbump API to verify the hash
 4. The API returns the ticket holder's email and ticket ID
 

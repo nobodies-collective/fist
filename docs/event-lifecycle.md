@@ -30,7 +30,7 @@ After strike     Managers migrate FIST to the next year's event
 - **Work style**: Full days with siesta; not shift-based
 - **Managed via**: Projects (multi-day commitments)
 - **Key teams**: Build Crew, DVS (volunteer servicing), Toolhaus, Demarcation, Power, LNT
-- **Cantina**: La Cantina feeds setup crews; the system tracks daily dietary headcounts
+- **Cantina**: La Cantina feeds setup crews; the system tracks daily dietary headcounts during the build period.
 
 Volunteers who sign up for setup shifts may qualify for **early entry** — arriving on site before the event officially starts. The early entry system tracks:
 - Maximum early entry passes available (`earlyEntryMax`)
@@ -60,7 +60,7 @@ Managers configure these dates and parameters in Event Settings (`/manager/event
 
 | Setting | Purpose |
 |---------|---------|
-| `eventName` | Identifier for this year's event (e.g., "nowhere2025") |
+| `eventName` | Identifier for this year's event (e.g., "fixme2026") |
 | `previousEventName` | Last year's event (for data migration reference) |
 | `eventPeriod` | Start and end dates of the event itself |
 | `buildPeriod` | Start and end dates of setup/build |
@@ -106,7 +106,7 @@ Several automated jobs run during the event lifecycle:
 | Missing ticket check | Daily at 4am | Re-check users without tickets against ticket API |
 | All ticket check | Weekly on Mondays | Re-validate all ticket IDs |
 
-Cron jobs automatically stop after the event end date.
+Ticket-related cron jobs automatically stop after the event end date.
 
 ## Year-to-Year Migration
 
@@ -116,7 +116,7 @@ At the end of each event cycle, managers migrate FIST to the next year. There ar
 
 Available via "Prepare FIST for a new event" on the manager dashboard:
 
-1. Enter the new event name (e.g., "nowhere2026") and new event dates
+1. Enter the new event name (e.g., "fixme2026") and new event dates
 2. The system copies from the current event:
    - All volunteer form data
    - Organizational structure (departments, teams)

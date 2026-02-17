@@ -17,7 +17,7 @@ Terminology used in FIST and the events it serves.
 
 | Term | Definition |
 |------|------------|
-| **NOrg** | Nowhere Organization. The single top-level division encompassing all departments and teams. |
+| **NOrg** | FixMe Organization (formerly Nowhere Organization). The single top-level division encompassing all departments and teams. |
 | **Division** | The highest level in the organizational hierarchy. Currently only NOrg exists. |
 | **Department** | A group of related teams under shared leadership. Examples: SLAP, BDSM, Malfare. |
 | **Team** | The operational unit where volunteers work. Each team has its own shifts, leads, and signup management. |
@@ -94,7 +94,7 @@ Terminology used in FIST and the events it serves.
 | **Barrio** | A neighborhood or camp at the event. Groups of participants who camp together and often contribute a shared offering. |
 | **Leave No Trace** | The principle that the event site must be returned to its original condition after strike. No litter, no marks, no evidence. |
 | **Participant** | Everyone at a burn event is a participant, not an attendee or spectator. The event is created collectively. |
-| **Nobody** | A participant at Nowhere specifically. A play on the event name. |
+| **Nobody** | A participant at FixMe specifically. A play on the event name. |
 
 ## Technical Terms
 

@@ -6,7 +6,7 @@ FIST (**F**or **I**nformation and **S**cheduling of **T**eams) is a web applicat
 
 ## The Event
 
-FIST was built for **Nowhere**, a participatory burn event held annually in a remote location in Spain. Nowhere is:
+FIST was built for **FixMe** (formerly Nowhere), a participatory burn event held annually in a remote location in Spain. FixMe is:
 
 - An experiment in creative freedom, participation, and cash-free community
 - Conceived, built, experienced, and returned to nothing by its participants

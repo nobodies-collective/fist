@@ -48,7 +48,7 @@ Division (NOrg)
 
 ## Division
 
-The top-level organizational container. In practice, there is one division called **NOrg** (short for Nowhere Organization). Divisions exist in the data model for flexibility but are not heavily used in the UI.
+The top-level organizational container. In practice, there is one division called **NOrg** (representing the FixMe Organization). Divisions exist in the data model for flexibility but are not heavily used in the UI.
 
 ## Department
 

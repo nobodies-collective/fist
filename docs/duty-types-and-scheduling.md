@@ -25,7 +25,7 @@ Shifts are typically 4-8 hours during event time.
 A project is a multi-day commitment, typically used for setup and strike work.
 
 **Properties:**
-- **Title**: Name of the project (e.g., "Build Middle of Nowhere")
+- **Title**: Name of the project (e.g., "Build Middle of FixMe")
 - **Start/End date**: Date range (not specific times)
 - **Min/Max volunteers**: Staffing targets
 - **Priority and policy**: Same as shifts
